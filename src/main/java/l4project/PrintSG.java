@@ -53,7 +53,7 @@ public class PrintSG extends Application {
 		String answer = graph.groundQuery("notFly(kowalski)."); // does kowalski fly?System.out.println(answer); // OUT
 		String json= getTable(graph);
 		System.out.println(json);
-		GUIGraphStream gui = new GUIGraphStream(CreateObjects(json));
+		GUIGraphStreamV2 gui = new GUIGraphStreamV2(CreateObjects(json));
 		
 		Application.launch(args);
 			
