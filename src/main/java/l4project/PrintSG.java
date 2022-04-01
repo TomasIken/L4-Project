@@ -9,6 +9,7 @@ import fr.lirmm.graphik.graal.api.forward_chaining.ChaseException;
 import fr.lirmm.graphik.graal.api.homomorphism.HomomorphismException;
 import fr.lirmm.graphik.graal.api.io.ParseException;
 import fr.lirmm.graphik.graal.defeasible.core.DefeasibleKnowledgeBase;
+import fr.lirmm.graphik.graal.defeasible.core.DefeasibleKnowledgeBaseCollection;
 import fr.lirmm.graphik.graal.elder.core.StatementGraph;
 import fr.lirmm.graphik.util.stream.IteratorException;
 import javafx.application.Application;
@@ -33,6 +34,26 @@ public class PrintSG extends Application {
 
 		kb.add("rbroken >> rfly .");
 		
+		
+		
+		return kb;
+	}
+
+	private static DefeasibleKnowledgeBase buildNewKB() throws AtomSetException, IteratorException, ChaseException, HomomorphismException, ParseException {
+		DefeasibleKnowledgeBase kb = new DefeasibleKnowledgeBase();
+		
+		kb.add("lowTemprature(weather)<=.");
+		kb.add("rain(weather)<= .");
+		kb.add("cloudy(weather)<=.");
+		
+		kb.add("cold(X) <- lowTemprature(X).");
+		kb.add("badWeather(X) <= cloudy(X).");
+		kb.add("badWeather(X) <= rain(X).");
+		
+		kb.add("stayHome(X) <=  cold(X), badWeather(X).");
+
+
+		
 		return kb;
 	}
 	private static StatementGraph initializeSG(DefeasibleKnowledgeBase kb) throws IteratorException, ChaseException, AtomSetException, HomomorphismException {
@@ -51,8 +72,11 @@ public class PrintSG extends Application {
 	public static void main(String[] args)  throws IteratorException, AtomSetException, ChaseException, HomomorphismException, ParseException, JsonMappingException, JsonProcessingException {
 		StatementGraph graph = initializeSG(buildKB());
 		String answer = graph.groundQuery("notFly(kowalski)."); // does kowalski fly?System.out.println(answer); // OUT
+//		StatementGraph graph = initializeSG(buildNewKB());
+//		String answer = graph.groundQuery("stayHome(weather).");
 		String json= getTable(graph);
 		System.out.println(json);
+		GetNaturalText text = new GetNaturalText(); //TBC
 		GUIGraphStreamV2 gui = new GUIGraphStreamV2(CreateObjects(json));
 		
 		Application.launch(args);
