@@ -1,5 +1,8 @@
 package l4project;
 
+import java.util.ArrayList;
+
+import org.graphstream.graph.Node;
 import org.json.JSONObject;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -70,15 +73,16 @@ public class PrintSG extends Application {
 		return json;
 	}
 	public static void main(String[] args)  throws IteratorException, AtomSetException, ChaseException, HomomorphismException, ParseException, JsonMappingException, JsonProcessingException {
-		StatementGraph graph = initializeSG(buildKB());
-		String answer = graph.groundQuery("notFly(kowalski)."); // does kowalski fly?System.out.println(answer); // OUT
-//		StatementGraph graph = initializeSG(buildNewKB());
-//		String answer = graph.groundQuery("stayHome(weather).");
+//		StatementGraph graph = initializeSG(buildKB());
+//		String answer = graph.groundQuery("notFly(kowalski)."); // does kowalski fly?System.out.println(answer); // OUT
+		StatementGraph graph = initializeSG(buildNewKB());
+		String answer = graph.groundQuery("stayHome(weather).");
 		String json= getTable(graph);
-		System.out.println(json);
-		GetNaturalText text = new GetNaturalText(); //TBC
 		GUIGraphStreamV2 gui = new GUIGraphStreamV2(CreateObjects(json));
-		
+		GetPaths GP = new GetPaths(gui.getGraph(),gui.getRoot(),gui.getQuery());
+		ArrayList<ArrayList<Node>> path = GP.getPathNode();
+		GetNaturalText GNT = new GetNaturalText(GP.getPathNode());
+		System.out.println(GNT.turnNodesToPartSentences());
 		Application.launch(args);
 			
 

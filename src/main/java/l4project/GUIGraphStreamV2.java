@@ -9,6 +9,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.awt.Container;
+import java.util.ArrayList;
 
 import javax.swing.*;
 import org.graphstream.ui.swing_viewer.*;
@@ -20,6 +21,7 @@ public class GUIGraphStreamV2 {
 	private JSONArray queryStatements;
 	private Graph graph;
 	private String initialID;
+	private String queryID;
 
 	public GUIGraphStreamV2(JSONObject jsonObject) {
 
@@ -44,10 +46,11 @@ public class GUIGraphStreamV2 {
 		createNodesAndEdges();
 		
 		setDepths(getRootID(),0);
-		setWidth(getRootID(),0);
-		graph.getNode(getRootID()).setAttribute("x", 7);
+		placeQueryOnTop();
+//		setWidth(getRootID(),0);
+		setWidth2();
 		
-		breakCollisions();
+		placeQueryOnTop();
 		//We apply a style for the graph
 		applyStyle();
 
@@ -78,6 +81,8 @@ public class GUIGraphStreamV2 {
 			JSONObject currStatement = statements.getJSONObject(i);
 			graph.addNode(currStatement.getString("id"));
 			graph.getNode(currStatement.getString("id")).setAttribute("ui.label", currStatement.getString("title"));
+			graph.getNode(currStatement.getString("id")).setAttribute("type", currStatement.getString("type"));
+			graph.getNode(currStatement.getString("id")).setAttribute("ruleType", currStatement.getJSONObject("ruleApplication").getString("type"));
 		}
 		
 		for(int i = 0; i< queryStatements.length();i++) {
@@ -85,6 +90,8 @@ public class GUIGraphStreamV2 {
 			graph.addNode(currStatement.getString("id"));
 			graph.getNode(currStatement.getString("id")).setAttribute("ui.label", currStatement.getString("title"));
 			graph.getNode(currStatement.getString("id")).setAttribute("ui.class", "query");
+			graph.getNode(currStatement.getString("id")).setAttribute("type", currStatement.getString("type"));
+
 		}
 		for(int i = 0; i< edges.length();i++) {
 			JSONObject currEdge = edges.getJSONObject(i);
@@ -105,10 +112,18 @@ public class GUIGraphStreamV2 {
 			JSONObject currStatement = statements.getJSONObject(i);
 			if (currStatement.isNull("premises")) {
 				initialID = currStatement.getString("id");
-				graph.getNode(currStatement.getString("id")).setAttribute("xy", 0,0);
 			}
 		}
 		return initialID;
+	}
+	private String getQueryID() {
+		for(int i = 0; i< queryStatements.length();i++) {
+			JSONObject currQuery = queryStatements.getJSONObject(i);
+			if (currQuery.getString("type").equals("claim")) {
+				queryID = currQuery.getString("id");
+			}
+		}
+		return queryID;
 	}
 	private void setDepths(String root,int parentDepth) {
 			for(int i =0; i < edges.length();i++) {
@@ -131,16 +146,59 @@ public class GUIGraphStreamV2 {
 			setWidth(currRoot.getLeavingEdge(i).getNode1().getId(),currWidth+i);
 		}
 	}
-	private void breakCollisions() {
-		// TBC might just do auto layout tbh
-		for(int i =0; i<graph.getNodeCount();i++) {
-			for(int j =0; j<graph.getNodeCount();j++) {
-				if ((graph.getNode(i).getId() != graph.getNode(j).getId()) & (graph.getNode(i).getAttribute("x")==graph.getNode(j).getAttribute("x"))& (graph.getNode(i).getAttribute("y")==graph.getNode(j).getAttribute("y")) ){
-					int currX=(Integer) graph.getNode(i).getAttribute("x");
-					graph.getNode(i).setAttribute("x", currX+2);
+	private void setWidth2() {
+		boolean flag = false;
+		int currDepth = 1;
+		ArrayList<Node> nodesSet = new ArrayList<Node>();
+		while (flag == false) {
+			int currWidth = 0;
+			ArrayList<Node> currLevel = new ArrayList<Node>();
+			for (int i = 0; i <graph.getNodeCount();i++) {
+				if (graph.getNode(i).getAttribute("y").equals(currDepth)) {
+					currLevel.add(graph.getNode(i));
 				}
 			}
+			for (Node node: currLevel) {
+				node.setAttribute("x", currWidth);
+				currWidth+=10 / currLevel.size();
+			}
+			nodesSet.addAll(currLevel);
+			if (nodesSet.size() >= (graph.getNodeCount())) {
+				graph.getNode(getRootID()).setAttribute("x", 5);
+				graph.getNode(getQueryID()).setAttribute("x", 5);
+				flag = true;
+			}
 		}
+	}
+	private void placeQueryOnTop() {
+		graph.getNode(getRootID()).setAttribute("y",0);
+		int maxDepth= 0;
+		for(int i = 0 ; i<statements.length(); i++) {
+			JSONObject currStatement = statements.getJSONObject(i);
+			int currDepth = (Integer) graph.getNode(currStatement.getString("id")).getAttribute("y");
+			if (currDepth >maxDepth) {
+				maxDepth = currDepth;
+			}
+		}
+		maxDepth++;
+		graph.getNode(getQueryID()).setAttribute("y", maxDepth);
+
+	}
+	public Graph getGraph() {
+		return graph;
+	}
+	public Node getRoot() {
+		return graph.getNode(getRootID());
+	}
+	public Node getQuery() {
+		if (queryStatements.length()>1) {
+			return null;
+		}
+		else {
+			String id = queryStatements.getJSONObject(0).getString("id");
+			return graph.getNode(id);
+		}
+		
 	}
 	public void applyStyle(){
 		graph.setAttribute("ui.stylesheet",
