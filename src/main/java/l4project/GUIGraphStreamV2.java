@@ -154,7 +154,6 @@ public class GUIGraphStreamV2 {
 
 			ArrayList<Node> currLevel = new ArrayList<Node>();
 			for (int i = 0; i <graph.getNodeCount();i++) {
-				System.out.println(graph.getNode(i).getAttribute("y"));
 				if (graph.getNode(i).getAttribute("y").equals(currDepth)) {
 					currLevel.add(graph.getNode(i));
 				}
@@ -169,8 +168,6 @@ public class GUIGraphStreamV2 {
 
 			nodesSet.addAll(currLevel);
 			if (nodesSet.size() >= (graph.getNodeCount())) {
-				graph.getNode(getRootID()).setAttribute("x", 5);
-				graph.getNode(getQueryID()).setAttribute("x", 5);
 				flag = true;
 			}
 			currDepth = currDepth+1;
