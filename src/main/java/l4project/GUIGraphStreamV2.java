@@ -148,26 +148,32 @@ public class GUIGraphStreamV2 {
 	}
 	private void setWidth2() {
 		boolean flag = false;
-		int currDepth = 1;
+		int currDepth = 0;
 		ArrayList<Node> nodesSet = new ArrayList<Node>();
 		while (flag == false) {
-			int currWidth = 0;
+
 			ArrayList<Node> currLevel = new ArrayList<Node>();
 			for (int i = 0; i <graph.getNodeCount();i++) {
+				System.out.println(graph.getNode(i).getAttribute("y"));
 				if (graph.getNode(i).getAttribute("y").equals(currDepth)) {
 					currLevel.add(graph.getNode(i));
 				}
 			}
+
+			int iter = 1;
 			for (Node node: currLevel) {
-				node.setAttribute("x", currWidth);
-				currWidth+=10 / currLevel.size();
+				float position = (10 * iter)/ (currLevel.size()+1);
+				node.setAttribute("x", position);
+				iter = iter+1;
 			}
+
 			nodesSet.addAll(currLevel);
 			if (nodesSet.size() >= (graph.getNodeCount())) {
 				graph.getNode(getRootID()).setAttribute("x", 5);
 				graph.getNode(getQueryID()).setAttribute("x", 5);
 				flag = true;
 			}
+			currDepth = currDepth+1;
 		}
 	}
 	private void placeQueryOnTop() {
