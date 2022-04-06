@@ -73,10 +73,10 @@ public class PrintSG extends Application {
 		return json;
 	}
 	public static void main(String[] args)  throws IteratorException, AtomSetException, ChaseException, HomomorphismException, ParseException, JsonMappingException, JsonProcessingException {
-//		StatementGraph graph = initializeSG(buildKB());
-//		String answer = graph.groundQuery("notFly(kowalski)."); // does kowalski fly?System.out.println(answer); // OUT
-		StatementGraph graph = initializeSG(buildNewKB());
-		String answer = graph.groundQuery("stayHome(weather).");
+		StatementGraph graph = initializeSG(buildKB());
+		String answer = graph.groundQuery("notFly(kowalski)."); // does kowalski fly?System.out.println(answer); // OUT
+//		StatementGraph graph = initializeSG(buildNewKB());
+//		String answer = graph.groundQuery("stayHome(weather).");
 		String json= getTable(graph);
 		GUIGraphStreamV2 gui = new GUIGraphStreamV2(CreateObjects(json));
 		GetPaths GP = new GetPaths(gui.getGraph(),gui.getRoot(),gui.getQuery());

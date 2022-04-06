@@ -22,6 +22,7 @@ public class GetNaturalText {
 		ArrayList<ArrayList<String>> sentencePaths = new ArrayList<ArrayList<String>>();
 		for(ArrayList<Node> path: nodePath) {
 			ArrayList<String> currSentencePath = new ArrayList<String>();
+			Node prevNode= null;
 			for (Node node: path) {
 				String currRule =node.getAttribute("ui.label").toString();
 				if (node.getAttribute("type").toString().equals("statement")) {
@@ -42,6 +43,7 @@ public class GetNaturalText {
 						currRule = "however since " + currRule;
 						currRule =currRule.replace(target, " then ");
 					}
+				
 					String target = ",";
 					currRule =currRule.replace(target, " and ");
 				}
@@ -50,7 +52,13 @@ public class GetNaturalText {
 				}
 				else if (node.getAttribute("type").toString().equals("claim")){
 				}
+				// support attack differentiation
+				if ((prevNode!=null) && prevNode.getEdgeBetween(node).getAttribute("ui.class").toString().equals("attackEdge")){
+					// if it is an attack edge
+					currRule= "attacks " + currRule;
+				}
 				currSentencePath.add(currRule);
+				prevNode = node;
 			}
 			sentencePaths.add(currSentencePath);
 		}

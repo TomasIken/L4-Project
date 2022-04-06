@@ -104,6 +104,9 @@ public class GUIGraphStreamV2 {
 			if(!currEdge.getString("type").equals("support")){
 				graph.getEdge(currEdge.getString("id")).setAttribute("ui.class", "attackEdge");
 			}
+			else {
+				graph.getEdge(currEdge.getString("id")).setAttribute("ui.class", "supportEdge");
+			}
 		}
 	}
 	
