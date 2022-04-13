@@ -24,16 +24,21 @@ public class PrintSG extends Application {
 
 	private static DefeasibleKnowledgeBase buildKB() throws AtomSetException, IteratorException, ChaseException, HomomorphismException, ParseException {
 		DefeasibleKnowledgeBase kb = new DefeasibleKnowledgeBase();
+		// Base KB does not label all edges for some reason
 		
-		kb.add("penguin(kowalski), bird(tweety), brokenWings(tweety).");
-		kb.add("beautiful(X) <- penguin(X).");
-		kb.add("sad(X) <- brokenWings(X).");
+		kb.add("isAPenguin(kowalski).");
+		kb.add("isABird(tweety)<-.");
+		kb.add("hasBrokenWings(tweety)<-.");
+		
+		kb.add("isBeautiful(X) <- isAPenguin(X).");
+		kb.add("isSad(X) <- hasBrokenWings(X).");
 
-		kb.add("notFly(X), bird(X) <- penguin(X).");
-		kb.add("[rfly] fly(X) <= bird(X).");
-		kb.add("[rbroken] notFly(X) <~ brokenWings(X) .");
+		kb.add("canNotFly(X) <- isAPenguin(X).");
+		kb.add("isABird(X) <- isAPenguin(X).");
+		kb.add("[rfly] canFly(X) <= isABird(X).");
+		kb.add("[rbroken] canNotFly(X) <~ hasBrokenWings(X) .");
 
-		kb.add("! :- fly(X), notFly(X).");
+		kb.add("! :- canFly(X), canNotFly(X).");
 
 		kb.add("rbroken >> rfly .");
 		
@@ -44,6 +49,7 @@ public class PrintSG extends Application {
 
 	private static DefeasibleKnowledgeBase buildNewKB() throws AtomSetException, IteratorException, ChaseException, HomomorphismException, ParseException {
 		DefeasibleKnowledgeBase kb = new DefeasibleKnowledgeBase();
+		// most simple KB no change in all 
 		
 		kb.add("lowTemprature(weather)<=.");
 		kb.add("rain(weather)<= .");
@@ -59,8 +65,78 @@ public class PrintSG extends Application {
 		
 		return kb;
 	}
+	private static DefeasibleKnowledgeBase buildKB3() throws AtomSetException, IteratorException, ChaseException, HomomorphismException, ParseException {
+		DefeasibleKnowledgeBase kb = new DefeasibleKnowledgeBase();
+		// KB for difference between TD and noTD
+		
+		kb.add("cheap(phone)<-.");
+		kb.add("detrimental(phone)<-.");
+		kb.add("goodReviews(phone)<-.");
+		kb.add("slowDelivery(phone)<-.");
+		
+		kb.add("[r1]buy(X) <= cheap(X).");
+		kb.add("[r2]buy(X) <= goodReviews(X).");
+		kb.add("[r3]notBuy(X) <= detrimental(X).");
+		kb.add("[r4]notBuy(X) <= slowDelivery(X).");
+		
+		kb.add("! :- buy(X), notBuy(X).");
+		
+		kb.add("r1 >> r3 .");
+		kb.add("r2 >> r4 .");
+
+
+		
+		return kb;
+	}
+	private static DefeasibleKnowledgeBase buildKB4() throws AtomSetException, IteratorException, ChaseException, HomomorphismException, ParseException {
+		DefeasibleKnowledgeBase kb = new DefeasibleKnowledgeBase();
+		// tutorial KB
+		
+		kb.add("incriminating(evidence1,alice)<=.");
+		kb.add("absolving(evidence2,alice)<=.");
+		kb.add("alibi(alice)<=.");
+		
+		kb.add("[r1]responsible(Y) <- incriminating(X,Y).");
+		kb.add("[r2]notResponsible(Y) <- absolving(X,Y).");
+		kb.add("[r3]guilty(X) <- responsible(X).");
+		kb.add("[r4]innocent(X) <- alibi(X).");
+		
+		
+		kb.add("! :- guilty(X), innocent(X).");
+		kb.add("! :- responsible(X), notResponsible(X).");
+
+		
+		return kb;
+	}
+	private static DefeasibleKnowledgeBase buildKB5() throws AtomSetException, IteratorException, ChaseException, HomomorphismException, ParseException {
+		DefeasibleKnowledgeBase kb = new DefeasibleKnowledgeBase();
+		// large
+		
+		// facts
+		kb.add("alone(jack).");
+		kb.add("hasCollar(jack).");
+		kb.add("hasMicrochip(jack).");
+		
+		
+		// rules
+		kb.add("[r1]keep(X) <- hasOwner(X,Y).");
+		kb.add("[r2]hasOwner(X,Y) <= hasCollar(X).");
+		kb.add("[r3]hasOwner(X,Y) <= hasMicrochip(X).");
+		kb.add("[r4]stray(X) <= alone(X).");
+		kb.add("[r5]adoption(X) <- stray(X).");
+		
+		// negative constraints
+		kb.add("! :- adoption(X), keep(X).");
+
+		// rule preferences
+		kb.add("r5>>r2.");
+		kb.add("r3>>r5.");
+
+		
+		return kb;
+	}
 	private static StatementGraph initializeSG(DefeasibleKnowledgeBase kb) throws IteratorException, ChaseException, AtomSetException, HomomorphismException {
-		sg = new StatementGraph(kb,"PDLwithTD");
+		sg = new StatementGraph(kb,"BDLwithTD");
 		sg.build();
 		return sg;
 	}
@@ -74,18 +150,27 @@ public class PrintSG extends Application {
 	}
 	public static void main(String[] args)  throws IteratorException, AtomSetException, ChaseException, HomomorphismException, ParseException, JsonMappingException, JsonProcessingException {
 		StatementGraph graph = initializeSG(buildKB());
-		String answer = graph.groundQuery("notFly(kowalski)."); // does kowalski fly?System.out.println(answer); // OUT
+		String answer = graph.groundQuery("canNotFly(kowalski)."); // does kowalski fly?System.out.println(answer); // OUT
+		String answer2 = graph.groundQuery("canFly(tweety).");
 //		StatementGraph graph = initializeSG(buildNewKB());
 //		String answer = graph.groundQuery("stayHome(weather).");
+//		StatementGraph graph = initializeSG(buildKB3());
+//		String answer = graph.groundQuery("buy(phone).");
+//		StatementGraph graph = initializeSG(buildKB4());
+//		String answer = graph.groundQuery("guilty(alice).");
+//		StatementGraph graph = initializeSG(buildKB5());
+//		String answer = graph.groundQuery("keep(jack).");
+//		String answer2 = graph.groundQuery("adoption(jack).");
 		String json= getTable(graph);
+		System.out.println(json);
 		GUIGraphStreamV2 gui = new GUIGraphStreamV2(CreateObjects(json));
-		GetPaths GP = new GetPaths(gui.getGraph(),gui.getRoot(),gui.getQuery());
-		ArrayList<ArrayList<Node>> path = GP.getPathNode();
-		GetNaturalText GNT = new GetNaturalText(GP.getPathNode());
-		System.out.println(GNT.turnNodesToPartSentences());
+		
+//		GetPaths GP = new GetPaths(gui.getGraph(),gui.getRoot(),gui.getQuery());
+//		ArrayList<ArrayList<Node>> path = GP.getPathNode();
+//		GetNaturalText GNT = new GetNaturalText(GP.getPathNode());
+//		System.out.println(GNT.turnNodesToPartSentences());
+		
 		Application.launch(args);
-			
-
 	}
 	@Override
 	public void start(Stage primaryStage) throws Exception {

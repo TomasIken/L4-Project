@@ -88,7 +88,8 @@ public class GUIGraphStreamV2 {
 		for(int i = 0; i< queryStatements.length();i++) {
 			JSONObject currStatement = queryStatements.getJSONObject(i);
 			graph.addNode(currStatement.getString("id"));
-			graph.getNode(currStatement.getString("id")).setAttribute("ui.label", currStatement.getString("title"));
+			graph.getNode(currStatement.getString("id")).setAttribute("ui.label", currStatement.getString("title") + " " + currStatement.getString("labelString"));
+//			graph.getNode(currStatement.getString("id")).setAttribute("ui.label", currStatement.getString("title"));
 			graph.getNode(currStatement.getString("id")).setAttribute("ui.class", "query");
 			graph.getNode(currStatement.getString("id")).setAttribute("type", currStatement.getString("type"));
 
@@ -220,7 +221,8 @@ public class GUIGraphStreamV2 {
 
 						+ "node.query {"
 						+ "shape: circle;"
-						+ "fill-color: #4F4E5A;"
+						+ "fill-color: #a8a1ff;"
+						+ "size-mode: fit;"
 						+ "}"
 
 						+ " edge {"

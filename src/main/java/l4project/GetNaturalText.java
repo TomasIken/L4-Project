@@ -30,7 +30,7 @@ public class GetNaturalText {
 					if (currRuleType.equals("strict")) {
 						String target = "->";
 						currRule = "since " + currRule;
-						currRule =currRule.replace(target, " then ");
+						currRule =currRule.replace(target, " then must ");
 						
 					}
 					else if (currRuleType.equals("defeasible") ) {
@@ -41,7 +41,7 @@ public class GetNaturalText {
 					else if (currRuleType.equals("defeater")) {
 						String target = "~>";
 						currRule = "however since " + currRule;
-						currRule =currRule.replace(target, " then ");
+						currRule =currRule.replace(target, " then must ");
 					}
 				
 					String target = ",";
@@ -55,7 +55,10 @@ public class GetNaturalText {
 				// support attack differentiation
 				if ((prevNode!=null) && prevNode.getEdgeBetween(node).getAttribute("ui.class").toString().equals("attackEdge")){
 					// if it is an attack edge
-					currRule= "attacks " + currRule;
+					currRule= "which contradicts " + currRule;
+				}
+				else {
+					currRule= " and " + currRule;
 				}
 				currSentencePath.add(currRule);
 				prevNode = node;
