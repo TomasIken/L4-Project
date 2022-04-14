@@ -197,13 +197,21 @@ public class GUIGraphStreamV2 {
 	public Node getRoot() {
 		return graph.getNode(getRootID());
 	}
-	public Node getQuery() {
+	public Node getQuery(String query) {
 		if (queryStatements.length()>1) {
+			for (int i = 0; i<queryStatements.length();i++) {
+				if( queryStatements.getJSONObject(i).getString("title").equals(query.substring(0, query.length() -1))) {
+					return graph.getNode(queryStatements.getJSONObject(i).getString("id"));
+				}
+			}
 			return null;
 		}
-		else {
+		else if (queryStatements.length()==1) {
 			String id = queryStatements.getJSONObject(0).getString("id");
 			return graph.getNode(id);
+		}
+		else {
+			return null;
 		}
 		
 	}

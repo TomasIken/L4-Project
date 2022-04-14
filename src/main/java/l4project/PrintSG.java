@@ -150,8 +150,10 @@ public class PrintSG extends Application {
 	}
 	public static void main(String[] args)  throws IteratorException, AtomSetException, ChaseException, HomomorphismException, ParseException, JsonMappingException, JsonProcessingException {
 		StatementGraph graph = initializeSG(buildKB());
-		String answer = graph.groundQuery("canNotFly(kowalski)."); // does kowalski fly?System.out.println(answer); // OUT
-		String answer2 = graph.groundQuery("canFly(tweety).");
+		String query1= "canNotFly(kowalski).";
+		String query2 = "canFly(tweety).";
+		String answer = graph.groundQuery(query1); // does kowalski fly?System.out.println(answer); // OUT
+		String answer2 = graph.groundQuery(query2);
 //		StatementGraph graph = initializeSG(buildNewKB());
 //		String answer = graph.groundQuery("stayHome(weather).");
 //		StatementGraph graph = initializeSG(buildKB3());
@@ -165,10 +167,10 @@ public class PrintSG extends Application {
 		System.out.println(json);
 		GUIGraphStreamV2 gui = new GUIGraphStreamV2(CreateObjects(json));
 		
-//		GetPaths GP = new GetPaths(gui.getGraph(),gui.getRoot(),gui.getQuery());
-//		ArrayList<ArrayList<Node>> path = GP.getPathNode();
-//		GetNaturalText GNT = new GetNaturalText(GP.getPathNode());
-//		System.out.println(GNT.turnNodesToPartSentences());
+		GetPaths GP = new GetPaths(gui.getGraph(),gui.getRoot(),gui.getQuery(query1));
+		ArrayList<ArrayList<Node>> path = GP.getPathNode();
+		GetNaturalText GNT = new GetNaturalText(GP.getPathNode());
+		System.out.println(GNT.getSentences());
 		
 		Application.launch(args);
 	}
