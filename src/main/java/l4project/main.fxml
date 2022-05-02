@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+
+<AnchorPane minHeight="-Infinity" minWidth="-Infinity" prefHeight="800.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="l4project.GUIJavaFX">
+   <children>
+      <Pane fx:id="statementGraph" layoutX="250.0" layoutY="-7.0" prefHeight="600.0" prefWidth="730.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0" />
+      <Button fx:id="confirm" layoutX="14.0" layoutY="413.0" mnemonicParsing="false" onAction="#buttonPush" prefHeight="50.0" prefWidth="250.0" text="Build Graph" AnchorPane.leftAnchor="10.0" />
+      <TextArea fx:id="input" layoutX="11.0" layoutY="44.0" prefHeight="290.0" prefWidth="250.0" text="isAPenguin(kowalski).&#10;isBeautiful(X) &lt;- isAPenguin(X).&#10;canNotFly(X) &lt;- isAPenguin(X).&#10;isABird(X) &lt;- isAPenguin(X).&#10;[rfly] canFly(X) &lt;= isABird(X).&#10;! :- canFly(X), canNotFly(X)." AnchorPane.leftAnchor="10.0" />
+      <TextArea fx:id="queryInput" layoutX="14.0" layoutY="363.0" prefHeight="50.0" prefWidth="250.0" text="canFly(kowalski)." AnchorPane.leftAnchor="10.0" />
+      <Text layoutX="10.0" layoutY="39.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Knowledge Base" wrappingWidth="250.0" AnchorPane.leftAnchor="11.0">
+         <font>
+            <Font name="Verdana Bold" size="24.0" />
+         </font>
+      </Text>
+      <Text layoutX="14.0" layoutY="358.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Queries" wrappingWidth="250.0" AnchorPane.leftAnchor="10.0">
+         <font>
+            <Font name="Verdana Bold" size="24.0" />
+         </font>
+      </Text>
+      <TextArea fx:id="outputText" editable="false" layoutX="261.0" layoutY="699.0" prefHeight="180.0" prefWidth="730.0" wrapText="true" AnchorPane.bottomAnchor="10.0" AnchorPane.rightAnchor="10.0" />
+   </children>
+</AnchorPane>
