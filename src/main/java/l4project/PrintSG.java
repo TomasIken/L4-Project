@@ -188,8 +188,7 @@ public class PrintSG extends Application {
 //		GetNaturalText GNT = new GetNaturalText(GP.getPathNode());
 //		System.out.println(GNT.getSentences());
 //		
-		
-		
+
 			//begins javafx application
 		Application.launch(args);
 	}

@@ -1,9 +1,9 @@
 package l4project;
 
-import java.util.ArrayList;
 
-import org.graphstream.graph.Node;
-import org.graphstream.ui.fx_viewer.FxViewPanel;
+import java.net.URL;
+import java.util.ResourceBundle;
+
 import org.json.JSONObject;
 
 import fr.lirmm.graphik.graal.api.core.AtomSetException;
@@ -13,20 +13,23 @@ import fr.lirmm.graphik.graal.api.io.ParseException;
 import fr.lirmm.graphik.graal.defeasible.core.DefeasibleKnowledgeBase;
 import fr.lirmm.graphik.graal.elder.core.StatementGraph;
 import fr.lirmm.graphik.util.stream.IteratorException;
+import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
+import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.Pane;
-import javafx.stage.Stage;
-
-public class GUIJavaFX {
+public class GUIJavaFX implements Initializable {
 	@FXML 
 	public Pane statementGraph;
 	public TextArea input;
 	public Button confirm;
 	public TextArea queryInput;
 	public TextArea outputText;
+	public ChoiceBox<String> labellingChoice;
+	private String[] labels = {"BDLwithTD","PDLwithTD","BDLwithoutTD","PDLwithoutTD"};
 	public GUIJavaFX() {
 	}
 	public void buttonPush(ActionEvent e) throws ParseException, IteratorException, AtomSetException, ChaseException, HomomorphismException {
@@ -36,11 +39,10 @@ public class GUIJavaFX {
 		// grabs both text area inputs, stores them in string arrays and clears the text area
 		String newLineChar=System.getProperty("line.separator");
 		String[] kb = input.getText().split(newLineChar);
-		StatementGraph graph = new StatementGraph(buildKB(kb),"BDLwithTD");
+		StatementGraph graph = new StatementGraph(buildKB(kb),chooseLabelling());
 		graph.build();
 		String[] queries = queryInput.getText().split(newLineChar);
 		addQueries(graph,queries);
-		
 		
 		String json= graph.toJSONString();
 		// creates the graph object and appends it to the pane object
@@ -79,9 +81,16 @@ public class GUIJavaFX {
 		}
 	}
 	private static JSONObject CreateObjects(String JSONString) {
-		//turns the JSON string from graal-eldr into a json object
+		//turns the JSON string from graal-elder into a json object
 		JSONObject json = new JSONObject(JSONString);
 //		System.out.println(json);
 		return json;
+	}
+	public String chooseLabelling() {
+		return labellingChoice.getValue().toString();
+	}
+	public void initialize(URL location, ResourceBundle resources) {
+		labellingChoice.getItems().addAll(labels);
+		
 	}
 }
