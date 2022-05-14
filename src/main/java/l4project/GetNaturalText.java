@@ -63,41 +63,33 @@ public class GetNaturalText {
 
 					String currRule =node.getAttribute("ui.label").toString();
 					
+					
 
 					
 					if (node.getAttribute("type").toString().equals("statement")) {
-						// take the variable inside the brackets
-						String object = currRule.substring(currRule.indexOf("(")+1, currRule.indexOf(")"));
-						// delete the brackets
-						currRule= currRule.replaceAll("[()]", "");
-						
-						// get the rule and turn the camel case into separate words 
-						currRule= splitCamelCase(currRule);
-						// delete the variable from the string
-						currRule= currRule.replaceAll(object, "");
-						
+//						// take the variable inside the brackets
+						currRule =objectsManipulation(currRule);
+			
 						// if the rule is a statement and not a query
 						// change string to match type of rule
 						String currRuleType = node.getAttribute("ruleType").toString();
 						if (currRuleType.equals("strict")) {
 							String target = "->";
-							currRule = "since " + object+ " " + currRule;
-							currRule =currRule.replace(target, " then " + object);
+							currRule =currRule.replace(target, " then ");
 							
 						}
 						else if (currRuleType.equals("defeasible") ) {
 							String target = "=>";
-							currRule = "since "+ object+ " " + currRule;
-							currRule =currRule.replace(target, " then maybe " + object);
+							currRule =currRule.replace(target, " then maybe ");
 						}
 						else if (currRuleType.equals("defeater")) {
 							String target = "~>";
-							currRule = "however since " + object+ " "+ currRule;
-							currRule =currRule.replace(target, " then "+ object);
+							currRule =currRule.replace(target, " then ");
 						}
 					
 						String target = ",";
 						currRule =currRule.replace(target, " and ");
+						currRule = "since " + currRule;
 					}
 					else if (node.getAttribute("type").toString().equals("claim")){
 						// if it is a query remove everything past the brackets
@@ -125,14 +117,36 @@ public class GetNaturalText {
 					prevNode = node;
 				}
 				else {
-					// if it is a simple rule simply place variable in the beginning and delete brackets
+					// if it is a fact simply place variable in the beginning and delete brackets
 					String currRule =node.getAttribute("ui.label").toString();
-					currRule = currRule.substring(currRule.indexOf(">")+1);
-					String object = currRule.substring(currRule.indexOf("(")+1, currRule.indexOf(")"));
-					currRule= currRule.replaceAll("[()]", " ");
-					currRule= splitCamelCase(currRule);
-					currRule= currRule.replaceAll(object, "");
-					currRule=object + " "+ currRule;
+					String currRuleType = node.getAttribute("ruleType").toString();
+					if (currRule.contains(",")) {
+						String currRuleTemp=null;
+						String object2 = currRule.substring(currRule.indexOf("(")+1,currRule.indexOf(","));
+						String capital= currRule.substring(currRule.indexOf(">")+2,currRule.indexOf(">")+3 ).toUpperCase();
+						String add= currRule.substring(currRule.indexOf(">")+3 ,currRule.indexOf("(")+1)+currRule.substring(currRule.indexOf(",")+1);
+						currRuleTemp = object2 + capital + add;
+						currRule = currRule.substring(0, currRule.indexOf(">")+1)+currRuleTemp;
+
+						currRule = currRule.substring(currRule.indexOf(">")+1);
+						String object = currRule.substring(currRule.indexOf("(")+1, currRule.indexOf(")"));
+						currRule= currRule.replaceAll("[()]", " ");
+						currRule= splitCamelCase(currRule);
+					}
+					else {
+						currRule = currRule.substring(currRule.indexOf(">")+1);
+						String object = currRule.substring(currRule.indexOf("(")+1, currRule.indexOf(")"));
+						currRule= currRule.replaceAll("[()]", " ");
+						currRule= splitCamelCase(currRule);
+						currRule= currRule.replaceAll(object, "");
+						currRule=object + " "+ currRule;
+					}
+					if (currRuleType.contentEquals("defeasible")) {
+						currRule= "it is possible that " + currRule;
+					}else if (currRuleType.contentEquals("defeater")) {
+						currRule= "however " + currRule;
+					}
+
 					
 					
 					currSentencePath.add(currRule);
@@ -165,8 +179,14 @@ public class GetNaturalText {
 		for(int i = 0 ; i<queryNode.getDegree();i++) {
 			String edgeType= queryNode.getEdge(i).getAttribute("ui.class").toString();
 			edgeType= edgeType.substring(0, edgeType.length()-4);
-			String edgeLabel = queryNode.getEdge(i).getAttribute("ui.label").toString();
-			String currEdge = "a " + edgeLabel + " edge "+ edgeType+ "s" + " and ";
+			String edgeLabel;
+			try {
+				edgeLabel = queryNode.getEdge(i).getAttribute("ui.label").toString();
+			}
+			catch(Exception e1){
+				edgeLabel = "redundant";
+			}
+			String currEdge = "a " + edgeLabel + " edge "+ edgeType+ "s" + " it and ";
 			output=output + currEdge; 
 		}
 		output=output.substring(0,output.length()-4);
@@ -184,4 +204,31 @@ public class GetNaturalText {
 		      " "
 		   );
 		}
+	private String objectsManipulation(String rule) {
+		String leftSide = rule.substring(0,rule.indexOf(")")+1);
+		String rightSide = rule.substring(rule.indexOf(">")+1);
+		
+		String object1 =leftSide.substring(leftSide.indexOf("(")+1, leftSide.indexOf(")"));
+		String object2 = rightSide.substring(rightSide.indexOf("(",rightSide.indexOf(">"))+1, rightSide.indexOf(")",rightSide.indexOf(">")));
+		if (object1.contains(",")) {
+			String[] leftObjects= object1.split(",");
+			leftSide = leftSide.substring(0,leftSide.indexOf("("));
+			leftSide= splitCamelCase(leftSide);
+			leftSide = leftObjects[0] +" "+ leftSide +" "+ leftObjects[1];
+		}else {
+			leftSide= object1 + " " + leftSide.replace("("+object1+")", "");
+			leftSide =splitCamelCase(leftSide);
+		}
+		if (object2.contains(",")) {
+			String[] rightObjects= object2.split(",");
+			rightSide = rightSide.substring(0,rightSide.indexOf("("));
+			rightSide= splitCamelCase(rightSide);
+			rightSide = rightObjects[0] +" "+ rightSide +" "+ rightObjects[1];
+		}else {
+			rightSide= object2 + " " + rightSide.replace("("+object2+")", "");
+			rightSide =splitCamelCase(rightSide);
+		}
+		rule= leftSide + rule.substring(rule.indexOf(")")+1,rule.indexOf(">")+1)+ rightSide;
+		return rule;
+	}
 }

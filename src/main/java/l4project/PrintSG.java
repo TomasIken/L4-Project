@@ -96,26 +96,6 @@ public class PrintSG extends Application {
 //		
 //		return kb;
 //	}
-//	private static DefeasibleKnowledgeBase buildKB4() throws AtomSetException, IteratorException, ChaseException, HomomorphismException, ParseException {
-//		DefeasibleKnowledgeBase kb = new DefeasibleKnowledgeBase();
-//		// tutorial KB
-//		
-//		kb.add("incriminating(evidence1,alice)<=.");
-//		kb.add("absolving(evidence2,alice)<=.");
-//		kb.add("alibi(alice)<=.");
-//		
-//		kb.add("[r1]responsible(Y) <- incriminating(X,Y).");
-//		kb.add("[r2]notResponsible(Y) <- absolving(X,Y).");
-//		kb.add("[r3]guilty(X) <- responsible(X).");
-//		kb.add("[r4]innocent(X) <- alibi(X).");
-//		
-//		
-//		kb.add("! :- guilty(X), innocent(X).");
-//		kb.add("! :- responsible(X), notResponsible(X).");
-//
-//		
-//		return kb;
-//	}
 //	private static DefeasibleKnowledgeBase buildKB5() throws AtomSetException, IteratorException, ChaseException, HomomorphismException, ParseException {
 //		DefeasibleKnowledgeBase kb = new DefeasibleKnowledgeBase();
 //		// large
@@ -171,8 +151,6 @@ public class PrintSG extends Application {
 //		StatementGraph graph = initializeSG(buildKB3());
 //		String answer = graph.groundQuery("buy(phone).");
 		
-//		StatementGraph graph = initializeSG(buildKB4());
-//		String answer = graph.groundQuery("guilty(alice).");
 		
 //		StatementGraph graph = initializeSG(buildKB5());
 //		String answer = graph.groundQuery("keep(jack).");

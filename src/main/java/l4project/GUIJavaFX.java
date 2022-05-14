@@ -2,8 +2,10 @@ package l4project;
 
 
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.ResourceBundle;
 
+import org.graphstream.graph.Node;
 import org.json.JSONObject;
 
 import fr.lirmm.graphik.graal.api.core.AtomSetException;
@@ -53,10 +55,16 @@ public class GUIJavaFX implements Initializable {
 		statementGraph.setVisible(true);
 		
 		// generates the paths and adds the resulting string to the output text area
-		GetPaths GP = new GetPaths(gui.getGraph(),gui.getRoot(),gui.getQuery(queries[0]));
-		GetNaturalText GNT = new GetNaturalText(GP.getPathNode());
 		outputText.clear();
-		outputText.setText(GNT.turnIntoOneString(GNT.getSentences()));
+		String textPrint="";
+		String newLine = "-----------------------------------------" + System.getProperty("line.separator");
+		for (int i = 0; i<queries.length;i++) {
+			GetPaths GP = new GetPaths(gui.getGraph(),gui.getRoot(),gui.getQuery(queries[i]));
+			GetNaturalText GNT = new GetNaturalText(GP.getPathNode());	
+			textPrint =textPrint + GNT.turnIntoOneString(GNT.getSentences());
+			textPrint= textPrint + newLine;
+		}
+		outputText.setText(textPrint.toLowerCase());
 		}
 		catch(Exception e1) {
 			//catch any errors and displays an error message in the output text area
@@ -91,6 +99,7 @@ public class GUIJavaFX implements Initializable {
 	}
 	public void initialize(URL location, ResourceBundle resources) {
 		labellingChoice.getItems().addAll(labels);
+		labellingChoice.setValue("BDLwithTD");
 		
 	}
 }
