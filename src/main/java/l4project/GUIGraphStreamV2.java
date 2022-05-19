@@ -3,15 +3,23 @@ package l4project;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
 import org.graphstream.graph.implementations.MultiGraph;
+import org.graphstream.ui.view.GraphRenderer;
 import org.graphstream.ui.view.View;
 import org.graphstream.ui.view.Viewer;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import javafx.scene.Scene;
+
 import java.awt.Container;
 import java.util.ArrayList;
 
 import javax.swing.*;
+
+import org.graphstream.ui.fx_viewer.FxDefaultView;
+import org.graphstream.ui.fx_viewer.FxViewPanel;
+import org.graphstream.ui.fx_viewer.FxViewer;
+import org.graphstream.ui.javafx.FxGraphRenderer;
 import org.graphstream.ui.swing_viewer.*;
 
 public class GUIGraphStreamV2 {
@@ -22,25 +30,19 @@ public class GUIGraphStreamV2 {
 	private Graph graph;
 	private String initialID;
 	private String queryID;
-
-	public GUIGraphStreamV2(JSONObject jsonObject) {
+	private Viewer viewer;
+	public GUIGraphStreamV2() {
+		graph = new MultiGraph("SG");
+	}
+	public void buildGraph(JSONObject jsonObject) {
 
 		//Initialising the object
 		statements = new JSONArray();
 		edges = new JSONArray();
 		rulePrefrences = new JSONArray();
 		queryStatements = new JSONArray();
-		graph = new MultiGraph("SG");
-
-
-
 		//Reading the Json object
 		splitJSON(jsonObject);
-
-//		System.out.println(statements);
-//		System.out.println(edges);
-//		System.out.println(rulePrefrences);
-//		System.out.println(queryStatements);
 
 		//We create the nodes and edges
 		createNodesAndEdges();
@@ -54,29 +56,23 @@ public class GUIGraphStreamV2 {
 		//We apply a style for the graph
 		applyStyle();
 
-		System.setProperty("org.graphstream.ui", "swing");
-		Viewer viewer = graph.display();
-		viewer.disableAutoLayout();
 	}
-	
-
+	public FxViewPanel javafxDisplay() {  
+		//function to turn the graphstream viewer into a javafx compatible panel
+        FxViewer v = new FxViewer(graph, FxViewer.ThreadingModel.GRAPH_IN_GUI_THREAD); 
+        v.disableAutoLayout();
+        FxViewPanel panel = (FxViewPanel)v.addDefaultView(false);
+        return panel;
+	}
 	private void splitJSON(JSONObject json) {
+		//turns the json file produced by graal-eldr into 4 different arrays able to be iterated through
 			statements = json.getJSONArray("statements");
 			edges = json.getJSONArray("edges");
 			rulePrefrences = json.getJSONArray("rulePreferences");
 			queryStatements = json.getJSONArray("queryStatements");
 	}
-	
-	
-	@SuppressWarnings("unused")
-	private static void showValues(JSONArray array) {
-		for(int i = 0; i< array.length();i++) {
-			System.out.println(array.getJSONObject(i));
-		}
-	}
-	
-	
 	private void createNodesAndEdges () {
+		// iterates though each JSON array and creates the appropriate edges and nodes with all the necessary information as attributes in each
 		for(int i = 0; i< statements.length();i++) {
 			JSONObject currStatement = statements.getJSONObject(i);
 			graph.addNode(currStatement.getString("id"));
@@ -92,7 +88,6 @@ public class GUIGraphStreamV2 {
 //			graph.getNode(currStatement.getString("id")).setAttribute("ui.label", currStatement.getString("title"));
 			graph.getNode(currStatement.getString("id")).setAttribute("ui.class", "query");
 			graph.getNode(currStatement.getString("id")).setAttribute("type", currStatement.getString("type"));
-
 		}
 		for(int i = 0; i< edges.length();i++) {
 			JSONObject currEdge = edges.getJSONObject(i);
@@ -110,8 +105,8 @@ public class GUIGraphStreamV2 {
 			}
 		}
 	}
-	
 	private String getRootID() {
+		//find the root node (T-> true)
 		for(int i = 0; i< statements.length();i++) {
 			JSONObject currStatement = statements.getJSONObject(i);
 			if (currStatement.isNull("premises")) {
@@ -121,6 +116,7 @@ public class GUIGraphStreamV2 {
 		return initialID;
 	}
 	private String getQueryID() {
+		// returns the query ID. Only works with a single query KB
 		for(int i = 0; i< queryStatements.length();i++) {
 			JSONObject currQuery = queryStatements.getJSONObject(i);
 			if (currQuery.getString("type").equals("claim")) {
@@ -130,6 +126,7 @@ public class GUIGraphStreamV2 {
 		return queryID;
 	}
 	private void setDepths(String root,int parentDepth) {
+		//orders nodes y position with the root at the bottom and each edge increasing the value of y by 1
 			for(int i =0; i < edges.length();i++) {
 				JSONObject currEdge = edges.getJSONObject(i);
 				if (root.equals(currEdge.getString("source"))){
@@ -138,19 +135,10 @@ public class GUIGraphStreamV2 {
 				}				
 			}
 	}
-	private void setWidth(String root,int parentWidth) {
-		Node currRoot = graph.getNode(root);
-		int currWidth =parentWidth - currRoot.getOutDegree()%2; 
-		for (int i = 0; i <currRoot.getOutDegree();i++) {
-			currRoot.getLeavingEdge(i).getNode1().setAttribute("x", currWidth+i);
-			currWidth+=1;
-		}
-		currWidth =parentWidth - currRoot.getOutDegree()%2; 
-		for (int i = 0; i <currRoot.getOutDegree();i++) {
-			setWidth(currRoot.getLeavingEdge(i).getNode1().getId(),currWidth+i);
-		}
-	}
+
 	private void setWidth2() {
+		// places the nodes in their x positions overlaps and crossovers can still happen
+		// but since UI allows for the reorganization of nodes this is considered not important
 		boolean flag = false;
 		int currDepth = 0;
 		ArrayList<Node> nodesSet = new ArrayList<Node>();
@@ -178,6 +166,7 @@ public class GUIGraphStreamV2 {
 		}
 	}
 	private void placeQueryOnTop() {
+		// sets the query y position to 1 above the highest node
 		graph.getNode(getRootID()).setAttribute("y",0);
 		int maxDepth= 0;
 		for(int i = 0 ; i<statements.length(); i++) {
@@ -192,12 +181,17 @@ public class GUIGraphStreamV2 {
 
 	}
 	public Graph getGraph() {
+		//returns the graph object
 		return graph;
 	}
 	public Node getRoot() {
+		//returns the root node object
 		return graph.getNode(getRootID());
 	}
 	public Node getQuery(String query) {
+		// returns the query node object
+		// if no queries null is returned
+		// if more than 1 queries the first one is returned
 		if (queryStatements.length()>1) {
 			for (int i = 0; i<queryStatements.length();i++) {
 				if( queryStatements.getJSONObject(i).getString("title").equals(query.substring(0, query.length() -1))) {
@@ -215,7 +209,8 @@ public class GUIGraphStreamV2 {
 		}
 		
 	}
-	public void applyStyle(){
+	private void applyStyle(){
+		// CSS formating for the nodes and edges
 		graph.setAttribute("ui.stylesheet",
 				"node { "
 						+ "shape: box;"
